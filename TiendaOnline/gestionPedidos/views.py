@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from gestionPedidos.models import *
 from django.core.mail import send_mail
 from django.conf import settings
+from gestionPedidos.forms import FormularioContacto
 
 def busqueda_productos(request):
     return render(request,"busqueda_productos.html")
@@ -30,12 +31,22 @@ def buscar(request):
 
 def contacto(request):
     if request.method=="POST":
-        subject=request.POST["asunto"]
-        message=request.POST["mensaje"]+" "+ request.POST["email"]
-        email_from=settings.EMAIL_HOST_USER
-        recipient_list=["elviscruz45@gmail.com"]
-        send_mail(subject,message,email_from,recipient_list)
-        return render(request,"gracias.html")
+        miFormulario=FormularioContacto(request.POST)
+        if miFormulario.is_valid():
+            infForm=miFormulario.cleaned_data
+            send_mail(infForm["asunto"],infForm["mensaje"],infForm.get("email",""),["elviscruz45@gmail.com"],)
+            return render(request,"gracias.html")
+    
+    else:
+        miFormulario=FormularioContacto()
+    return render(request,"formulario_contacto.html",{"form":miFormulario})            
+
+        #subject=request.POST["asunto"]
+        #message=request.POST["mensaje"]+" "+ request.POST["email"]
+        #email_from=settings.EMAIL_HOST_USER
+        #recipient_list=["elviscruz45@gmail.com"]
+        #send_mail(subject,message,email_from,recipient_list)
+        #return render(request,"gracias.html")
        
-    return render(request,"contacto.html")
+    #return render(request,"contacto.html")
 
